@@ -1,0 +1,198 @@
+#+title: Exercises
+#+author: Timm Behner
+#+date: <2023-01-27 Fri>
+* Tag 1
+** Erstelle ein Projekt
+1. Falls nicht vorhanden, installiere Rustup auf deinem System: https://rustup.rs
+   Rustup installiert üblicherweise auch direkt die =stable= Toolchain von Rust, falls das nicht passiert
+   #+begin_src shell
+    rustup install stable
+   #+end_src
+   (Überprüfe ggf auch die Umgebungsvariablen.)
+2. Erstelle ein neues Rust-Projekt mit cargo.
+** Schaltjahre
+Schreibe eine Funktion, die für ein Jahr bestimmt, ob es sich um ein [[https://de.wikipedia.org/wiki/Schaltjahr][Schaltjahr]] handelt
+#+begin_src rust
+fn is_leap_year(year: usize) -> bool;
+#+end_src
+** Primzahlen
+Schreibe eine Funktion die Primzahlen bis zu dieser oberen Schranke bestimmt.
+Das kann man beispielsweise mit dem [[https://de.wikipedia.org/wiki/Sieb_des_Eratosthenes][Sieb des Eratosthenes]] implementiert werden.
+#+begin_src rust
+fn primes(upper_bound: usize) -> Vec<usize>;
+#+end_src
+** Primfaktoren
+Schreibe eine Funktion, die für eine Zahl, alle ihre Primfaktoren berechnet
+#+begin_src rust
+fn prime_factors(number: usize) -> Vec<usize>;
+#+end_src
+** Anagramme
+Schreibe eine Funktion, die zwei Strings entgegennimmt und prüft, ob diese [[https://de.wikipedia.org/wiki/Anagramm][Anagramme]] sind
+#+begin_src rust
+fn is_annagram(lhs: &str, rhs: &str) -> bool;
+#+end_src
+** Palindrom
+Schreibe eine Funktion die prüft, ob ein String ein [[https://de.wikipedia.org/wiki/Palindrom][Palindrom]] ist.
+#+begin_src rust
+fn is_palindrome(word: &str) -> bool;
+#+end_src
+** Caesar
+Implementiere die [[https://de.wikipedia.org/wiki/Caesar-Verschlüsselung][Caesar-Chiffre]] zum verschlüsseln von Text.
+#+begin_src rust
+fn encrypt_caesar(message: &str, key: usize) -> String;
+fn decrypt_caesar(message: &str, key: usize) -> String;
+assert!(decrypt_caesar(encrypt_caesar("Hello, World!", 4), 4) == "Hello, World!");
+#+end_src
+** Relative Häufigkeit von Zeichen
+In der Kryptoanalyse kann man einfache Chifren wie Caesar durch ermitteln der relativen Häufigkeit von Zeichen brechen: [[https://de.wikipedia.org/wiki/Caesar-Verschlüsselung#Entzifferung_und_Sicherheit][Entzifferung von Caesar]]
+
+Zähle die relative Häufigkeit aller Zeichen in einem String
+#+begin_src rust
+fn char_distribution(message: &str) -> HashMap<char, f64>();
+#+end_src
+
+Versuche die Datei =encrypted.caesar= mittels der statistischen Analyse zu
+entschlüsseln. Lese hierzu die Datei ein, ermittle die relative Häufigkeit der
+Buchstaben und gleiche diese automatisch mit der [[https://de.wikipedia.org/wiki/Buchstabenhäufigkeit][Buchstabenhäufigkeit]] ab.
+Entschlüssle den Text mit dem wahrscheinlichsten Schlüssel.
+
+** Binäre Suche
+1. Implementiere eine [[https://de.wikipedia.org/wiki/Binäre_Suche][Binäre Suche]] auf einem Slice von Integern, sodass der Index des Elementes zurückgegeben wird, falls der Wert gefunden wurde.
+   #+begin_src rust
+    fn binary_search(haystack: &[usize], needle: usize) -> Option<usize>
+   #+end_src
+2. Veralgemeinere die Suche auf alle Typen, die teilweise Vergleichbar ([[https://doc.rust-lang.org/std/cmp/trait.PartialEq.html][PartialEq]]) sind.
+** Bubble-Sort auf allen sortierbaren Typen implementieren
+- implementiere zunächst eine Bubble-Sort-Funktion für isize
+- mache die Funktion generisch
+** Luhn Prüfziffer
+
+- implementiere den [[https://de.wikipedia.org/wiki/Luhn-Algorithmus][Luhn-Algorithmus]]
+  #+begin_src rust
+is_valid(input: &str) -> bool
+  #+end_src
+- implementiere einen Luhn-Struct, sodass verschiedene Typen in den Luhn-Struct konvertiert und überprüft werden können
+  #+begin_src rust
+  pub struct Luhn;
+
+  impl From<&str> for Luhn {
+      fn from(input: &str) -> Self {
+          // ...
+      }
+  }
+  #+end_src
+
+  hierbei soll mindestens
+  #+begin_src rust
+Luhn::from("123456").is_valid()
+Luhn::from(123456).is_valid()
+Luhn::from(123456usize).is_valid()
+Luhn::from(123456isize).is_valid()
+Luhn::from(240u8).is_valid()
+  #+end_src
+  möglich sein.
+- implementiere ein Luhn-Trait, sodass verschiedene Typen das Luhn-Trait implementieren und damit überprüft werden können
+
+  #+begin_src rust
+pub trait Luhn{
+    fn is_valid(&self) -> bool;
+}
+
+impl Luhn for &str {
+    fn is_valid(&self) -> bool {
+        // implement me
+    }
+}
+  #+end_src
+
+  hierbei sollen mindestens
+  #+begin_src rust
+  "123 456 789".is_valid();
+  123_456_789usize.is_valid();
+  123_456_789isize.is_valid();
+  123u8.is_valid();
+  #+end_src
+  möglich sein.
+
+* Tag 2
+** Große Dateien
+Finden aller Dateien, die eine bestimmte Größe überschreiten.
+- benutze [[https://docs.rs/walkdir/latest/walkdir/][walkdir]] um über alle Verzeichnisse und Dateien zu iterrieren
+- die Größe einer Datei kann in den [[https://doc.rust-lang.org/nightly/std/fs/struct.Metadata.html#method.len][Metadaten]] gefunden werden
+** mygrep
+Implementiere eine eigene Version von [[https://de.wikipedia.org/wiki/Grep][grep]]. (Nur die Kernfunktionalität.)
+- Verwende [[https://docs.rs/regex/latest/regex/][regex]] zum kompilieren des Patterns
+- Unterteile deine implementierung so, dass sie sowohl als Library, als auch als Anwendung genutzt werden kann.
+** Hash-Werte
+Berechne für jede Datei im Dateisystem ihren SHA-256 Hash-Wert
+- mit [[https://docs.rs/walkdir/latest/walkdir/][walkdir]] kannst du wieder über das Dateisystem iterieren
+- [[https://docs.rs/sha256/latest/sha256/][sha256]] berechnet den Hash-Wert
+** PPR - Pretty Portable Ransomware
+Achtung: Folgende Aufgabe kann zum Verlust von Dateien führen!
+
+Verschlüssele alle Dateien ab einem bestimmten Wurzelverzeichniss
+- zur Verschlüsselung kann man [[https://docs.rs/chacha20poly1305/latest/chacha20poly1305/][ChaCha20-Poly1305]] verwenden
+- der Dateiname soll mit dem Hash der ursprünglichen Datei ersetzt werden
+** Ownership von Knoten in einem Binärbaum
+Implementiere einen [[https://de.wikipedia.org/wiki/Binärbaum][Binärbaum]]
+- mit fixen Werte-Typ
+- mit variablen Werte-Typ der ein Node-Trait implementiert
+** Funktionen-Timer
+- eine Funktion die eine Funktion ohne Parameter und Rückgabewerte entgegennimmt
+- die Anzahl der Milisekunden zurückgibt, die es gedauert hat die Funktion auszuführen
+** grepper aus Regex erzeugen
+- Schreibe eine Funktion, die eine Regex entgegennimmt
+- eine Funktion src_rust{f: Fn(String) -> bool} zurückgibt
+- src_rust{f(input) == true} falls der reguläre Ausdruck passt.
+** funktionales greppen auf Dateien
+Schreibe eine funktion die eine Funktion src_rust{f: Fn(String) -> bool} und einen Dateinamen entgegennimmt
+- die Funktion soll
+  1. die Datei lesen
+  2. zeilenweise die Funktion anwenden
+- alle Zeilen zurückgeben, auf der src_rust{f(line) == true}
+** Bußgelder im fließenden Verkehr
+Berechne einige interessante Werte der Bußgelder im fließenden Verkehr in Bonn.
+- Einlesen der Daten von [[https://opendata.bonn.de/dataset/8c40097b-72ff-4150-89af-8dc5548f6439/resource/efef5c5b-decf-4479-922f-a1cc32eeaad2][opendata Bonn]]
+- Wie viele Delikte wurden mit mehr als 1000Eur geahndet?
+- Was sind die absoluten Einnahmen der Stadt Bonn durch die Bußgelder?
+** Fahrradmessstellen in Bonn
+Berechne einige interessante Werte der Fahrradmessstellen in Bonn.
+- Einlesen der Daten von [[https://opendata.bonn.de/dataset/fahrradmessstellen-ergebnisse-radz%C3%A4hlungen-2022][opendata Bonn]]
+- Akkumulieren aller Zählerstände pro Messstelle
+- Wo und wann wurden die meisten Fahrräder gezählt? (pro Tag)
+- Welche Messstelle hatte durchschnittlich die höchsten Zahlen?
+- Sind die Zahlen an der Süd-Seite und Nord-Seite der Nordbrücke konsistent?
+** Wiki-Crawler
+Erstelle einen Baum von Wikipedia-Artikeln
+- [[https://docs.rs/reqwest/latest/reqwest/][reqwest]] nutzen um alle Links einer Seite zu produzieren
+- Links in einer Queue verwalten
+- alle Links anfragen
+- [[https://docs.rs/threadpool/latest/threadpool/][Threadpool]] nutzen um das auf mehrere Threads aufzuteilen
+- als Daten-Struktur kann man [[https://docs.rs/petgraph/latest/petgraph/][petgraph]] nutzen
+** Hashen mit Rust
+- Schreibe eine Funktion zum Hashen eines Datei-Inhaltes mit Rust
+  #+begin_src rust
+fn (file_path: &str) -> String
+  #+end_src
+
+- Schreibe mit cxx eine Bridge, sodass du diese Funktion von C++ aus aufrufen kannst
+
+** Hashen mit C++
+- Schreibe eine Funktion zum Hashen eines Datei-Inhaltes mit C++
+- Schreibe mit cxx eine Bridge, sodass du diese Funktion von Rust aus aufrufen kannst
+
+Für die Projekt-Struktur gibt es ein Template in diesem [[m][Github-Repo]].
+** Hamming-Distanz als Python-Paket
+- Implementiere eine Rust-Funktion zur Berechnung der [[https://en.wikipedia.org/wiki/Hamming_distance][Hamming-Distanz]] von zwei Strings.
+- Implementiere mit PyO3 ein Python-Modul, um diese Funktion von Python nutzen zu können
+** Command-Line-Filter mit Python-Plugins
+Auf der Kommandozeile benutzt man häufig Programme zum transformieren von Text,
+üblicherweise zeilenbasiert (grep, sed, awk, etc.).  In dieser Übung soll eine
+Rust-Anwendung entwickelt werden, in der man Python-Skripte als solche
+Transformatoren hinzufügen kann.
+- Schreibe eine Rust-Anwendung die Zeilenweise von der Standard-Eingabe stdin ließt
+- Suche nach Python-Modulen (Dateien mit der Endung src_shell{py})
+  Jedes dieser Module muss per Konvention eine Funktion src_python{run(*args, **kwargs)} enthalten
+  Dabei gibt src_python{run} entweder src_python{None} oder einen möglicherweise veränderten src_python{str} zurück.
+- Importiere alle Python-Module
+- Rufe für jede Zeile jede importierte Run-Funktion auf und übergebe in src_python{kwargs} die Zeile und Zeilennummer. Gib die modifizierte Zeile (falls vorhanden und nicht gefiltert) auf der Standardausgabe aus.

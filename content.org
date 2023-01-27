@@ -1,0 +1,1843 @@
+#+title: Content
+#+author: Timm Behner
+#+date: <2023-01-27 Fri>
+#+OPTIONS: H:3
+
+* Intro
+** Vorstellung
+*** Wer bin ich?
+Timm Behner
+- MSc in Informatik Uni Bonn 2016
+- Fraunhofer FKIE (Cyber Analysis & Defense) bis 2022
+  - Datenbanken- & Netzwerk-Forensik
+  - Infrastruktur-Projekte
+  - Lehre
+- Deutsche Telekom Security
+  - Kryptographische Software-Systeme
+- Teig-Monitor mit Arduino, Thermometer, Abstandssensor und Rust
+*** Wer seid ihr?
+- Vorkenntnisse
+- Erwartungen
+- Ziele
+** Organisation
+*** Zeitplan
+| Tag | Slot          | Thema                                             |
+| --- | ------------- | --------------                                    |
+| Sa. | 09:00 - 10:35 | Rust Einführung und Speicherverwaltung            |
+| Sa. | 10:45 - 12:15 | Rust Generics, Traits und Error-Handling          |
+| Sa. | 13:00 - 17:00 | Übungen                                           |
+| So. | 09:00 - 10:35 | Rust OOP und Funktionale Programmierung           |
+| So. | 10:45 - 12:15 | Rust Fearless Concurrency und Interoperatibilität |
+| So. | 13:00 - 17:00 | Übungen                                           |
+
+*** Resourcen
+- [[https://github.com/tbehner/makerspace-rust-workshop][dieser Workshop]]
+- [[https://doc.rust-lang.org/book/title-page.html][Rust Buch]] (auch auf [[https://rust-lang-de.github.io/rustbook-de/][deutsch]])
+- Pakete finden auf [[https://crates.io][crates.io]]
+- [[https://doc.rust-lang.org/edition-guide/][Edition Guide]]
+- [[https://doc.rust-lang.org/cargo/][Cargo Buch]]
+- [[https://rust-lang-nursery.github.io/rust-cookbook/][Rust Cookbook]]
+- [[https://doc.rust-lang.org/std/index.html#][Dokumentation der Standard-Bibliothek]]
+- clippy, language-server und rustc
+- [[https://github.com/tbehner/makerspace-rust-workshop][makerspace-rust-workshop auf github]]
+*** Bug Bounty Program
+Belohnung für:
+ - gefundene Fehler
+ - beantwortete Fragen
+** Wieso Rust?
+*** Design Goals
+- Reliable: If it compiles, it works
+- Performant: Idiomatic code runs efficiently
+- Suuportive: the language, tools, and community are here to help
+- Productive: a little effort does a lot of work
+- Transparent: you can predict and control low-level details
+- Versatile: You can do anything with Rust
+*** Verbreitung
+- Firefox
+- Amazon (AWS Firecracker und Bottlerocket)
+- Microsoft (Azure -- IoT Edge)
+- Cloudflares QUIC und Pingora
+- Linux
+- npm
+*** Beliebtheit
+Rust ist die meist geliebte Programmiersprache in der StackOverflow Nutzerstudie
+
+ - seit 7 Jahren
+ - seit Rust 1.0
+ - mit fast 20%-Punkten Abstand
+*** Perfomance
+- [[https://blog.cloudflare.com/how-we-built-pingora-the-proxy-that-connects-cloudflare-to-the-internet/][Pingora]] braucht 70% weniger CPU und 67% weniger Speicher
+- https://discord.com/blog/why-discord-is-switching-from-go-to-rust
+*** Anwendungsbereiche
+- Backend Anwendungen (Server-Anwendungen, Microservices, ...)
+- System-Werkzeuge
+- Cryptocurrencies, Blockchains, Blockchain-Anwendungen
+- Frontend (Web Assembly)
+- Embedded
+- Programmiersprachen
+* Rust Einführung
+** Rust Projekt erstellen
+*** Installation
+- Rustup: Installationsprogramm für Rust und Rust-Komponenten
+#+begin_src shell
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+#+end_src
+Installation von src_shell{rustc} und src_shell{cargo}
+- Rust aktuell halten
+#+begin_src shell
+rustup update
+#+end_src
+- Installation von alternativen Toolchains
+#+begin_src shell
+rustup install nightly
+rustup default nightly
+#+end_src
+- [[https://rust-lang.github.io/rustup/examples.html][Rustup Dokumentation]]
+*** Entwicklungsumgebung
+- IDEs
+  - IntelliJ Idea (via Plugin)
+  - Eclipse (via Plugin)
+  - VSCode (with Plugin)
+- Text-Editor und Kommandozeile
+  - Emacs
+  - Vim
+  - VSCode
+  - Sublime
+  - ... jeder mit LSP-Support?
+- [[https://www.rust-lang.org/tools][Rust Tools Resourcen]]
+*** Projekte erstellen mit Cargo
+- Erstellen einer neuen Anwendung
+#+begin_src shell
+cargo new hello_rust
+#+end_src
+- Erstellen einer neuen Bibliothek
+#+begin_src shell
+cargo new --lib greeting
+#+end_src
+*** Hello Rust
+#+begin_src rust
+// src/main.rs
+fn main() {
+    println!("Hello, world!");
+}
+#+end_src
+
+#+RESULTS:
+: Hello, world!
+
+*** Cargo Konfiguration
+#+begin_src toml
+# Cargo.toml
+[package]
+name = "hello_rust"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+#+end_src
+*** Greeting Library
+#+begin_src rust
+// src/lib.rs
+pub fn add(left: usize, right: usize) -> usize {
+    left + right
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        let result = add(2, 2);
+        assert_eq!(result, 4);
+    }
+}
+#+end_src
+
+*** Cargo Library Konfiguration
+#+begin_src toml
+[package]
+name = "greeter"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+#+end_src
+** Variablen und Datentypen
+*** Variablen deklarieren
+- Deklaration und Initialisierung
+    #+begin_src rust
+    let x: usize = 5;
+    println!("x has value {x}");
+    #+end_src
+
+    #+RESULTS:
+    : x has value 5
+
+- Deklaration mit späterer Initialisierung
+  #+begin_src rust
+    let x: usize;
+    x = 5;
+    println!("x has value {x}");
+    #+end_src
+
+#+RESULTS:
+: x has value 5
+*** Primitive skalare Datentypen
+- Zahlen-Typen
+  - Ganzzahlig: =i8=, =i16=, ..., =i128=
+  - positiv Ganzzahlig: src_rust{u8}, src_rust{u16}, ..., src_rust{u128}
+  - Architekturabhängig Ganzzahlig: src_rust{isize}, src_rust{usize}
+  - Fließkommazahlen: src_rust{f64}, src_rust{f32}
+- boolescher Typ: src_rust{bool}
+- Zeichen src_rust{char}
+*** Primitive Verbunddatentypen
+- Tuple
+  #+begin_src rust
+let color: (u8, u8, u8) = (226, 0, 116);
+let corp: (usize, f64) = (3, 3.1415);
+println!("{color.0} -- {color.1} -- {color.2}")
+  #+end_src
+
+- Array
+  #+begin_src rust
+let scores: [u8; 3] = [1, 2, 3];
+println!("Score: {score[0]}");
+println!("Score: {score[1]}");
+println!("Score: {score[2]}");
+  #+end_src
+  - gleicher Datentyp
+  - feste Kapazität
+  - Index aus Ausdruck
+*** Variablen verändern
+
+- alle Variablen haben einen konstanten (unveränderbaren) Wert
+    #+begin_src rust
+    let x = 5;
+    x = 6; //  cannot assign twice to immutable variable `x`
+    println!("x has value {x}");
+    #+end_src
+
+- es sei denn, man macht sie veränderbar
+    #+begin_src rust
+    let mut x = 5;
+    x = 6;
+    println!("x has value {x}");
+    #+end_src
+
+*** Datentypen ableiten
+- bei Zuweisung
+    #+begin_src rust
+    let x = 5;
+    println!("x has value {x}");
+    #+end_src
+- Kontextabhängig
+  #+begin_src rust
+let answer = "42".parse(); // Error: type annotations needed
+  #+end_src
+
+*** Compile-time Konstanten
+#+begin_src rust
+const PI_FOR_PHYSICS: f64 = 3;
+#+end_src
+- zur Kompilierzeit zugewiesen
+- immer src_rust{static}
+- müssen explizit typisiert sein
+** Häufige Verbunddatentypen auf dem Heap
+*** Vec (src_rust{std::vec::Vec})
+  #+begin_src rust
+let values: Vec<usize> = Vec::from([1, 2, 3, 4]);
+let also_values: Vec<usize> = vec![1, 2, 3, 4];
+  #+end_src
+
+  - variable Anzahl an Elementen
+  - gleicher Datentyp
+  - Kapazität \neq Länge
+
+#+begin_src rust
+values[0]; // \rightarrow 1
+values.len(); // \rightarrow 4
+values.capacity(); // \rightarrow 8
+values.is_sorted(); // \rightarrow true
+#+end_src
+
+*** mut Vec
+Modifizierende Operationen nur auf mutable Vec:
+
+#+begin_src rust
+let mut values = vec![1, 2, 3];
+values.push(4); // \rightarrow [1, 2, 3, 4]
+values.extend(vec![2, 1]); // \rightarrow [1, 2, 3, 4, 2, 1]
+values.pop(); // \rightarrow [1, 2, 3, 4, 2]
+values.sort(); // \rightarrow [1, 2, 2, 3, 4]
+dbg!(values);
+#+end_src
+
+#+RESULTS:
+: [src/main.rs:8] values = [
+:     1,
+:     2,
+:     2,
+:     3,
+:     4,
+: ]
+
+- Erweitern
+- Löschen
+- Sortieren
+
+*** String (src_rust{std::string::String})
+  #+begin_src rust
+let greeting = String::from("Hello, World!");
+dbg!(greeting.len()); // \rightarrow 13
+dbg!(greeting.to_lowercase()); // \rightarrow "hello, world!"
+dbg!(greeting.as_bytes()); // \rightarrow [72, 101, 108, 108, 111, 44, 32, 87, 111, 114, 108, 100, 33]
+  #+end_src
+
+  #+RESULTS:
+  #+begin_example
+  [src/main.rs:4] greeting.len() = 13
+  [src/main.rs:5] greeting.to_lowercase() = "hello, world!"
+  [src/main.rs:6] greeting.as_bytes() = [
+      72,
+      101,
+      108,
+      108,
+      111,
+      44,
+      32,
+      87,
+      111,
+      114,
+      108,
+      100,
+      33,
+  ]
+  #+end_example
+
+  - UTF-8 String
+  - variable Länge und Inhalt
+*** mut String
+Modifizierende Operationen auf Strings
+#+begin_src rust
+let mut greeting = String::from("Hello, ");
+greeting.push('W');
+greeting.push_str("orld!");
+dbg!(greeting);
+#+end_src
+
+#+RESULTS:
+: [src/main.rs:6] greeting = "Hello, World!"
+
+** Funktionen
+*** Funktionen definieren und aufrufen
+#+begin_src rust
+fn say_hello() {
+    println!("Hello, World!");
+}
+
+fn main() {
+    say_hello();
+}
+#+end_src
+
+#+RESULTS:
+: Hello, World!
+
+*** Parameter und Rückgabewert
+#+begin_src rust
+fn greet(greeting: String, subject: String) {
+    println!("{greeting}, {subject}!")
+}
+dbg!(greet("Hello".into(), "World".into()));
+#+end_src
+
+#+RESULTS:
+: Hello, World!
+: [src/main.rs:6] greet("Hello".into(), "World".into()) = ()
+
+#+begin_src rust
+fn add_one(x: usize) -> usize {
+    return x + 1;
+}
+dbg!(add_one(41));
+#+end_src
+
+#+RESULTS:
+: [src/main.rs:6] add_one(41) = 42
+
+*** Anweisungen und Ausdrücke
+- Anweisungen: Instruktionen die einen Effekt haben, und *keinen* Wert zurückgeben:
+
+  #+begin_src rust
+    let x = 5;
+  #+end_src
+
+- Ausdrücke: werden zu einem Ergebniss ausgewertet und *können* einen Effekt haben:
+
+  #+begin_src rust
+    x + 5;
+    x;
+  #+end_src
+*** Letzter Ausdruck als Rückgabewerte
+Der letzte Ausdruck einer Funktion ist ihr Rückgabewert
+#+begin_src rust
+fn add_one(x: usize) -> usize {
+    x + 1
+}
+#+end_src
+aber auf Semikolon achten:
+#+begin_src rust
+fn add_one(x: usize) -> usize {
+    x + 1;
+    // Error - implicitly returns `()` as its body has no tail or `return` expression
+}
+#+end_src
+
+** Kontrollstrukturen (Teil 1)
+*** Bedingte Ausführung
+#+begin_src rust
+if /*condition*/ {
+    /*true case*/
+} else {
+    /*false case*/
+}
+#+end_src
+- src_rust{if} sind Ausdrücke
+  #+begin_src rust
+let y = 10;
+let x = if y == 5 {
+    y
+} else {
+    y + 1
+};
+dbg!(x);
+  #+end_src
+
+  #+RESULTS:
+  : [src/main.rs:9] x = 11
+
+*** Mehrere Bedingungen
+#+begin_src rust
+let number = 49;
+if number % 2 == 0 {
+   println!("{number} is not a prime");
+} else if number % 3 == 0 {
+   println!("{number} is not a prime");
+} else if number % 5 == 0 {
+   println!("{number} is not a prime");
+} else {
+   println!("{number} is probably a prime");
+}
+#+end_src
+
+#+RESULTS:
+: 49 is probably a prime
+
+*** Loops
+- Endlos-Schleifen
+#+begin_src rust
+loop {
+    println!("Sind wir bald da?");
+}
+#+end_src
+- Schleifen sind Ausdrücke
+  #+begin_src rust
+let arr = [1, 3, 4];
+let mut counter = 0;
+let final_value = loop {
+   if arr[counter] % 2 != 0  {
+       break arr[counter] * 2
+   }
+    counter += 1;
+};
+dbg!(final_value);
+  #+end_src
+
+  #+RESULTS:
+  : [src/main.rs:11] final_value = 2
+
+*** While-Loops
+#+begin_src rust
+let mut counter = 5;
+let mut factorial = 1;
+while counter > 1 {
+    factorial *= counter;
+    counter -= 1;
+}
+println!("5! = {factorial}")
+#+end_src
+
+#+RESULTS:
+: 5! = 120
+
+- =while= ist *kein* Ausdruck, sondern eine Anweisung
+
+*** For-Loops
+Iteration über eine Kollektion zu Iterieren
+#+begin_src rust
+let a = [1, 2, 3, 4];
+for x in a {
+    println!("{x}")
+}
+#+end_src
+
+#+RESULTS:
+: 1
+: 2
+: 3
+: 4
+
+*** For-Loop über einen Zahlenbereich
+- exklusives Intervall
+#+begin_src rust
+for i in 1..4 {
+    /* tue etwas mit i*/
+}
+#+end_src
+- inklusives Intervall
+  #+begin_src rust
+for i in 1..=4 {
+    /* tue etwas mit i*/
+}
+  #+end_src
+** Tests (Teil 1)
+*** Test Setup
+#+begin_src rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_name() {
+        assert!(true);
+    }
+}
+#+end_src
+
+- Tests in eigenem Modul
+- Test-Funktionen werden annotiert
+- src_rust{assert} Macros zum Prüfen von Werten
+- src_rust{assert!(false, "This is false!")} Fehlermeldungen anpassen
+*** Tests ausführen
+- src_shell{cargo test} -- alle Tests ausführen
+- src_shell{cargo test -- --show-output} -- Anzeigen der Standard-Ausgabe
+- src_shell{cargo test test_name} -- Ausführen einzelner Tests
+- Ignorieren von einzelnen Tests
+  #+begin_src rust
+    #[test]
+    #[ignore]
+    fn ignored_test() {
+        assert!(false);
+    }
+  #+end_src
+
+*** Tests organisieren
+- Als Sub-Modul (in der gleichen Datei)
+- Als eigenes Modul (gesonderte Datei)
+- Als Integration-Tests in gesondertem Verzeichniss
+* Speicher, Ownership und Lifetimes
+** Ownership auf Speicher
+*** Ownership eines Values
+#+begin_src rust
+{                      // s is not valid here, it’s not yet declared
+    let s = "hello";   // s is valid from this point forward
+    // do stuff with s
+}                      // this scope is now over, and s is no longer valid
+#+end_src
+
+#+RESULTS:
+
+*** Ownership Regeln
+- Each value has *exactly* one owner
+- When the owner goes out of scope, the value will be dropped
+*** Copy on assignment
+#+begin_src rust
+{
+    let s = "hello";
+    let f = s;
+    println!("{}, {}!", s, f);
+}
+#+end_src
+
+#+RESULTS:
+: hello, hello!
+
+*** Ownership und Funktionen
+#+begin_src rust
+fn greet(name: String) -> String {
+    let mut greeting = String::from("Hello, ");
+    greeting.push_str(&name);
+    greeting.push('!');
+    greeting
+}
+
+fn main() {
+    let name = "Thorsten".to_string();
+    let greeting = greet(name);
+    dbg!(greeting);
+}
+#+end_src
+
+#+RESULTS:
+: [src/main.rs:12] greeting = "Hello, Thorsten!"
+
+*** Heap vs Stack
+- src_rust[]{String} auf dem Heap
+#+begin_src rust
+{
+    let s = String::from("hello");
+    let f = s;                     // value moved here
+    println!("{}, {}!", s, f);      // Error -- value borrowed here after move
+}
+#+end_src
+
+#+RESULTS:
+: error: Could not compile `cargoUbyibw`.
+
+*** Referenzen
+Konstante Pointer:
+#+begin_src rust
+{
+    let s = String::from("hello");
+    let f = &s; // -> &String
+    println!("{}, {}!", s, f);
+}
+#+end_src
+
+#+RESULTS:
+: hello, hello!
+
+Dereferenzieren mit src_rust{*}
+#+begin_src rust
+let v: usize = 5; // type: usize
+let r = &v; // type: &usize
+assert_eq!(v, *r);
+dbg!(*r);
+#+end_src
+
+#+RESULTS:
+: [src/main.rs:6] *r = 5
+
+*** Veränderbare Referenzen
+Referenzen *mit* Schreibe-Zugriff
+#+begin_src rust
+{
+    let mut s = String::from("hello");
+    let f = &mut s;
+    f.push_str(" there, General Kenobi!");
+    println!("{f}");
+}
+#+end_src
+
+#+RESULTS:
+: hello there, General Kenobi!
+
+Alles hat Grenzen!
+#+begin_src rust
+{
+    let mut s = String::from("hello");
+    let f = &mut s;
+    f.push_str(" there, General Kenobi!");
+    println!("{}, {}!", s, f); // Error
+    // error[E0502]: cannot borrow `x` as immutable because it is also borrowed as mutable
+}
+#+end_src
+
+#+RESULTS:
+: error: Could not compile `cargo6bwFtE`.
+
+Zu jeder Zeit kann es entweder:
+- eine veränderbare (mutable) Referenz
+- oder eine beliebige Anzahl von nicht-veränderbaren Referenzen geben
+
+*** Dangling References und Lifetimes
+Der Compiler überprüft gültigkeit von Referenzen
+#+begin_src rust
+fn make_dangling_reference() -> &String {
+    let o = String::from("foo");
+    &o // return reference to o
+} // o goes out of scope
+// Error -- expect lifetime parameter
+#+end_src
+
+#+begin_src rust
+fn make_reference(name: &str) -> &str {
+    &name
+}
+#+end_src
+
+und explizite Lifetimes
+#+begin_src rust
+fn make_reference<'a>(name: &'a str) -> &'a str {
+    &name
+}
+#+end_src
+*** Slices und Ownership
+Slices sind eine Referenz auf einen Teil einer Kollektion
+- String Slices src_rust{&str}
+    #+begin_src rust
+    let s = String::from("Hello, World!");
+
+    dbg!(&s[0..5]);
+    dbg!(&s[7..12]);
+    #+end_src
+
+    #+RESULTS:
+    : [src/main.rs:5] &s[0..5] = "Hello"
+    : [src/main.rs:6] &s[7..12] = "World"
+
+- General Slices  src_rust{&[T]}
+  #+begin_src rust
+let v = vec![1, 2, 3];
+dbg!(&v[1..2]);
+  #+end_src
+
+  #+RESULTS:
+  : [src/main.rs:4] &v[1..2] = [
+  :     2,
+  : ]
+
+*** Explizite Lebenszeit
+- alle bisherigen Refernezen hatten eine implizite Lebenszeit
+
+    #+begin_src rust
+    fn get_first(input: &str) -> &str {
+        &input[0..1]
+    }
+    #+end_src
+
+- explizite Lebenszeit
+
+    #+begin_src rust
+    fn get_first<'a>(input: &'a str) -> &'a str {
+        &input[0..1]
+    }
+    #+end_src
+
+- manchmal notwendig
+
+    #+begin_src rust
+
+    fn multiple_lifetimes(first: &str, second: &str) -> &str {
+        first
+    }
+
+    let v = "I'm on the stack";
+    {
+        let a = String::from("look, I'm on the heap!");
+        let result = multiple_lifetimes(v, &a);
+        assert_eq!(result, v);
+    }
+
+    #+end_src
+
+    #+RESULTS:
+    : error: Could not compile `cargo7hzoB2`.
+
+*** Statische Lebenszeit
+- Statisch in der erzeugten Binärdatei
+- Gleiche Lebenszeit wie src_rust{main}
+
+#+begin_src rust
+const VERSIONNUMBER: &'static str = "v0.0.1"
+const DBCONNECTION: &'static Connection = /* ... */
+#+end_src
+
+** Structs
+*** Definition
+- Gruppieren von zusammenhängenden Daten und Kapselung von Daten
+    #+begin_src rust
+    struct Point {
+        x: f64,
+        y: f64,
+        desc: String,
+    }
+    #+end_src
+
+- Instanzen (Objekte) eines src_rust{struct}
+
+    #+begin_src rust
+    let origin = Point{x: 0, y: 0, desc: "origin".to_string()}
+    #+end_src
+
+- Kopieren
+  #+begin_src rust
+let shifted = Point{x: 1, ..origin}
+  #+end_src
+
+- Auf Teile (Member) zugreifen mit Punkt-Notation src_rust{origin.desc}
+
+*** Structs mit Referenzen
+- Structs können Besitzer all ihrer Daten sein
+- können aber auch Referenzen haben
+  #+begin_src rust
+struct ExtDescPoint<'a> {
+   x: f64,
+   y: f64,
+   desc: &'a str,
+}
+  #+end_src
+*** Methoden
+#+begin_src rust
+struct Circle {
+    radius: f64
+}
+#+end_src
+
+Methoden für src_rust{struct} definieren
+ - Struct-Methoden
+   #+begin_src rust
+impl Circle {
+    fn get_pi() -> f64 {3.141592}
+}
+   #+end_src
+
+- Objekt-Methoden
+    #+begin_src rust
+impl Circle {
+    fn area(&self) -> f64 {2 * 3.1415 * self.radius * self.radius}
+}
+    #+end_src
+
+- veränderbare Objekt-Methoden
+    #+begin_src rust
+impl Circle {
+    fn resize(&mut self, new_radius: f64) {self.radius = new_radius}
+}
+    #+end_src
+
+*** Enums
+- Gruppierung alternativer, fester Werte
+  #+begin_src rust
+enum DataSource {
+    Network,
+    FileSystem,
+    UserInput,
+}
+  #+end_src
+
+- jeder Wert kann wiederum Variablen beinhalten
+#+begin_src rust
+enum DataSource {
+    Network(IpAddr),
+    FileSystem(std::path::PathBuf),
+    UserInput,
+}
+#+end_src
+** Smart Pointers
+*** Typen von Smart Pointers
+- src_rust{String}
+- src_rust{Vec}
+- src_rust{Box<T>}
+- src_rust{Rc<T>}
+- src_rust{RefCell<T>} (und src_rust{Ref} / src_rust{RefMut})
+*** Box
+Speicher auf dem Heap
+- Rekursive Datentype haben keine bekannte Größe
+  #+begin_src rust
+    enum BinTree {
+        Node(BinTree, BinTree),
+        Nil,
+    }
+  #+end_src
+- Performanz bei Funktionsaufrufen
+- Trait-Objekte (s. OOP)
+*** Rc
+Mehrere Owner des gleichen Objektes:
+#+begin_src rust
+let a = Rc::new(BinTree(Nil, Nil)); // Anzahl der Referenzen 1
+let b = BinTree(Rc::clone(a), Nil); // Anzahl der Referenzen 2
+{
+    let c = BinTree(Rc::clone(a), Nil); // Anzahl der Referenzen 3
+}
+println!("{Rc::string_count(&a)}")// Anzahl der Referenzen 2
+#+end_src
+
+- src_rust{Rc::clone} erzeugt eine neue Referenz (Pointer)
+- src_rust{a} wird erst gelöscht, wenn es keine Referenzen mehr gibt
+- src_rust{Rc} ist immer eine src_rust{Box}
+- /kaum/ overhead
+*** Schwache Referenzen mit Rc
+- Problem: Zirkuläre Referenzen:
+  - doppelt verkettete Listen
+  - Referenzen auf Eltern-Knoten in Graphen
+- Erzeugung erhöht *nicht* den Referenz-Zähler
+   #+begin_src rust
+   let par = Rc::new(5);
+   let weak_ref = Rc::downgrade(&par);
+   #+end_src
+- Zugriff kann ins Leere laufen!
+  #+begin_src rust
+weak_ref.upgrade() match {
+    Some(r) => {/* */},
+    None => {/* */}
+}
+  #+end_src
+
+*** RefCell
+- Borrow-Checking-Regeln zur Laufzeit
+- neue RefCell erstellen
+  #+begin_src rust
+    let msg: RefCell<String> = RefCell::new(String::from("hello"));
+  #+end_src
+
+- Versuche den Wert zu leihen (borrow) \rightarrow src_rust{Ref}
+  #+begin_src rust
+    {
+        if let Ok(m) = msg.try_borrow() {
+            // use m here
+        }
+    } // msg not borrowed anymore
+  #+end_src
+
+- Versuche den Wert veränderbar zu leihen (mutable borrow) \rightarrow src_rust{RefMut}
+  #+begin_src rust
+    if let Ok(m) = msg.try_borrow_mut() {
+        // change m here
+    } // msg not borrowed anymore
+  #+end_src
+
+*** Rerence Counted Reference Cell
+#+begin_src rust
+let value = Rc::new(RefCell::new("Shared mutable string"));
+#+end_src
+
+- mehrere Owner von veränderbarem Objekte src_rust{Rc<RefCell<T>>}
+- src_rust{Rc::clone} zum Kopieren der Referenz
+- src_rust{RefMut} zum verändern der Werte
+*** Borrow-Checker-Hell
+- Zuerst muss es kompilieren, kümmere dich um Effizienz später
+- Verschiebe Werte auf den Heap (String, Vec, Box)
+- Kopiere Werte
+- Klone Objekte
+- Verschiebe Objekte in eine src_rust{Rc}
+- Verschiebe Objekte in eine src_rust{RefCell}
+
+In dynamisch typisierten Programmiersprache ist jeder Wert eine src_rust{Rc<RefCell<T>>}!
+** Traits
+*** Traits definieren und implementieren
+- Gemeinsame Funktionalität die mehrere Structs teilen
+  #+begin_src rust
+    trait Shape {
+        fn size(&self) -> f64;
+    }
+  #+end_src
+
+- Structs können Traits implementieren
+  #+begin_src rust
+    struct Circle {
+        r: f64
+    }
+
+    impl Shape for Circle {
+        fn size(&self) -> f64 {2 * 3.141529 * r * r}
+    }
+  #+end_src
+
+*** Traits als Parameter
+- src_rust{impl} Schlüsselwort
+    #+begin_src rust
+    fn is_smaller(first: &impl Shape, second: &impl Shape) -> bool {
+        first.size() < second.size
+    }
+    #+end_src
+- als Trait-Bound (s. [[Generics]])
+- Rückgabewerte mit *eindeutigem* Typen
+  #+begin_src rust
+    fn get_shape(r: f64) -> impl Shape {
+        return Circle{r}
+    }
+  #+end_src
+
+*** Default-Implementierungen
+Implementierung von Standardverhalten
+
+#+begin_src rust
+impl Named {
+    fn get_name(&self) -> String
+    fn say_hello(&self) -> String {
+        format!("Hello, my name is {}", self.get_name())
+    }
+}
+#+end_src
+
+*** Derivable Traits
+- Implementierung wird durch Macro erzeugt
+
+#+begin_src rust
+#[derive(Debug)]
+struct Person {
+    name: String
+}
+let p = Person{name: "Linus"};
+println!("{p:?}");
+dbg!(p);
+#+end_src
+
+- =PartialEq=: partielle Vergleichbarkeit
+- =PartialOrd=: partielle Ordnung
+- =Clone=: Tiefe Kopie des Objekts (auch auf dem Heap)
+- =Copy=: ausschließlich auf dem Stack
+- https://doc.rust-lang.org/book/appendix-03-derivable-traits.html
+** Generics
+*** Generische Funktionen
+#+begin_src rust
+fn find(needle: usize, haystack: Vec<usize>) -> usize {
+    //
+}
+#+end_src
+
+wird zu
+
+#+begin_src rust
+fn find<T>(needle: T, haystack: Vec<T>) -> usize {
+    //
+}
+#+end_src
+
+*** Generische Structs
+  #+begin_src rust
+struct Matrix<T> {
+   values: Vec<Vec<T>>
+}
+
+impl<T> Matrix<T> {
+    fn get(&self, x: usize, y: usize) -> &T {
+        &self.values[x][y]
+    }
+}
+  #+end_src
+
+- Container-Datentypen
+- Generische Pattern
+*** Generische Enums
+- src_rust{enums} können auch generische Datentypen haben
+    #+begin_src rust
+    enum Option<T> {
+        Some(T),
+        None
+    }
+    #+end_src
+- Entspricht Algebraischen Datentypen aus funktionalen Programmiersprachen
+
+*** Trait-Bounds
+Anforderungen an generische Typen
+#+begin_src rust
+struct Matrix<T: Default + Clone + PartialEq> {
+   values: Vec<Vec<T>>
+}
+#+end_src
+
+Beispiel:
+  - src_rust{Default}: Standardwert
+  - src_rust{Clone}: Wert kann geklont werden
+  - src_rust{PartialEq}: Typ ist partiell vergleichbar
+
+#+begin_src rust
+fn is_smaller<T: Shape>(first: &T, second: &T) -> bool {
+    first.size() < second.size
+}
+#+end_src
+
+** Security
+*** Speicherbasierte Security-Bugs
+- 70% of all security bugs are memory safety issues.
+- Sowohl in [[https://www.zdnet.com/article/chrome-70-of-all-security-bugs-are-memory-safety-issues/][Chrome]] als auch in [[https://www.zdnet.com/article/microsoft-70-percent-of-all-security-bugs-are-memory-safety-issues/][Microsoft Produkten]]
+- Zugriffsfehler: Buffer Overflow, Buffer Over-Read, Use After Free, Race Conditions
+- Uninitialisierte Werte: Null pointer dereference, Wild Pointers
+- Speicher Lecks: Double Free, Invalid Free, Unwanted Aliasing
+*** Warum ist Rust sicherer?
+- Keine Null-Pointer
+- Kein uninitialisierter Speicher
+- Kein uninitialisierter Pointer
+- Keine unchecked Memory-Boundaries
+
+Vermiedene Probleme:
+- Buffer Overflows
+- Race Conditions
+- Invalid Page faults
+- Use after free
+- Memory Leaks
+- Dangling-Pointers/Wild-Pointser
+*** Was ist mit dem Rest?
+- DDoS
+- Injections
+- ...
+* Error-Handling
+** KontrollStrukturen (Teil 2)
+*** Matching auf Enums
+
+#+begin_src rust
+enum Color {Red, Green, Blue}
+let v = Color::Red;
+match v {
+    Color::Red => println!("this is red")
+    Color::Green => println!("this is green")
+    _ => println!("this is some other color")
+}
+#+end_src
+
+- default-Fall
+- Kompiler überprüft auf Vollständigkeit
+
+*** Matching auf Enums mit Variablen-Bindung
+#+begin_src rust
+enum Color {RGB(u8, u8, u8), HEX(String)}
+let white = Color::RGB(255, 255, 255);
+match white {
+    Color::HEX(value) => println!("hex value with #{value}"),
+    Color::RGB(r, g, _) => println!("This color is {r} red,  {g} green, and some blue"),
+}
+#+end_src
+
+#+RESULTS:
+: This color is 255 red,  255 green, and some blue
+
+- Bindung an Variablen
+- Ownership-Regeln gelten
+*** ref-Schlüsselwort
+- src_rust{ref} alternative Schreibweise für Referenzen
+    #+begin_src rust
+    let v = 5;
+    let r1 = &v;
+    let ref r2 = v;
+    #+end_src
+- Referenzen in Matching
+    #+begin_src rust
+    match white {
+        HEX(ref value) => println!("{value} is a &str now!"),
+        RGB(r, g, _) => println!("This color is {r} red,  {g} green, and some blue"),
+    }
+    #+end_src
+
+*** Match-Pattern
+- Überprüfung von gebundenen Variablen
+  #+begin_src rust
+    let k = Ok(5);
+    match k {
+        Ok(v) if v % 2 == 0 => println!("even result"),
+        Ok(v)  => println!("odd result"),
+        Err(_) => println!("some error"),
+    }
+  #+end_src
+
+- Ranges
+  #+begin_src rust
+    let v = 5;
+    match v {
+        1..=5 => println!("a number between 1 and 5"),
+        _ => println!("some different number"),
+    }
+  #+end_src
+
+  #+RESULTS:
+  : a number between 1 and 5
+
+- Alternativen
+    #+begin_src rust
+    let c = 'q';
+    match c {
+        'q' | 'Q' => println!("quit"),
+        _ => println!("some action"),
+    }
+    #+end_src
+
+    #+RESULTS:
+    : quit
+
+*** If-Pattern
+Pattern matchting kann auch in =if=-Verzweigungen genutzt werden.
+
+#+begin_src rust
+let k = Ok(5)
+if let Ok(n) == k {
+    println!("{n}");
+}
+#+end_src
+
+** Result-Enum
+*** Behebbare Fehler repräsentieren
+#+begin_src rust
+enum Result<T, E> {
+    Ok(T),
+    Err(E)
+}
+#+end_src
+
+Fehler behandeln:
+#+begin_src rust
+use std::fs;
+let open_result = fs::File::open("some_file.txt");
+let f = match open_result {
+    Ok(some_file) => some_file,
+    Err(e) => panic!("Could not open file!"),
+};
+#+end_src
+
+#+RESULTS:
+: thread 'main' panicked at 'Could not open file!', src/main.rs:7:15
+
+*** Methoden für Result
+#+begin_src rust
+let r = Ok(0);
+r.is_ok(); // -> true
+r.is_err(); // -> false
+r.unwrap(); // -> 0
+r.unwrap_or_default(5); // -> 0
+r.unwrap_or_else(get_some_value()); // -> 0
+#+end_src
+
+- Ergebniss überprüfen
+- Wert extrahieren
+- mehr in [[Funktionale Programmierung]]
+*** Fragezeichen-Operator
+- Frühzeitiges terminieren der Funktion mit src_rust{match}
+    #+begin_src rust
+    let file = match std::fs::File::open("some_file.txt") {
+        Ok(f) => f,
+        Err(e) => return Err(e)
+    };
+    #+end_src
+
+- viel Boilerplate-Code
+- Fragezeichen-Postfix-Operator
+    #+begin_src rust
+    fn read_file(filename: &str) -> Result<String, std::io::Error> {
+        let mut file = std::fs::File::open(filename)?;
+        let mut out: String = String::new();
+        file.read_to_string(&mut out)?;
+        Ok(out)
+    }
+    #+end_src
+- Rückgabewert muss passen
+*** Nicht-behebbare Fehler
+- src_rust{panic}-Macro zum Beenden des Prozesses
+  #+begin_src rust
+  panic!("that was not okay!");
+  #+end_src
+- src_rust{Result} in src_rust{panic} umwandeln
+  #+begin_src rust
+  let v: Result<String, String> = Ok("Ok...".into());
+  let r: Result<String, String> = Err("This is wrong!".into());
+
+  let correct_string: String = v.expect("a valid string");
+  r.expect("That this blows up!"); // KABOOM!
+  #+end_src
+
+  #+RESULTS:
+  : thread 'main' panicked at 'That this blows up!: "This is wrong!"', src/main.rs:7:5
+
+*** Logische Operationen
+- src_rust{lhs.or(rhs)}
+   | method | lhs    | rhs       | output |
+   | ------ | ------ | --------- | ------ |
+   | or     | Ok(x)  | (ignored) | Ok(x)  |
+   | or     | Err(d) | Ok(y)     | Ok(y)  |
+   | or     | Err(d) | Err(e)    | Err(e) |
+
+- src_rust{lhs.and(rhs)}
+   | method | lhs    | rhs       | output |
+   | ------ | ------ | --------- | ------ |
+   | and    | Ok(x)  | Ok(y)     | Ok(y)  |
+   | and    | Ok(x)  | Err(d)    | Err(d) |
+   | and    | Err(d) | (ignored) | Err(d) |
+** Option-Enum
+*** Optionale Werte
+#+begin_src rust
+enum Option<T> {
+    Some(T),
+    None
+}
+#+end_src
+
+mit Methoden analog / kompatibel zu src_rust{Result}
+
+*** Methoden für Results und Options
+- Verschachtelte Ergebnisse
+#+begin_src rust
+let r = Ok(Some("yay!"));
+r.transpose(); // -> Some(Ok("yay!"))
+#+end_src
+
+- src_rust{Result} in src_rust{Option} umwandeln
+  #+begin_src rust
+  let maybe = Ok(1);
+  maybe.ok() // -> Some(1)
+  maybe.err() // -> None
+  #+end_src
+
+- src_rust{Option} in src_rust{Result} umwandeln
+  #+begin_src rust
+    let maybe = Some(1);
+    maybe.ok_or("this should not happen!")
+  #+end_src
+
+* Projekte organisieren
+** Packages, Crates und Module
+*** Nomenklatur
+- Package: Ein oder mehrere Crates
+- Crate: Kleinste Einheit von Code, die der Rust Compiler (und cargo) verarbeitet
+  - Library Crates und Binary Crates
+  - Beliebig viele Binary Crates
+  - Maximal ein Library Crate
+*** Crate Verzeichnissstruktur und Suchheuristik
+Module:
+ - inline Modul in src_shell{lib.rs}
+ - Modul in eigener Datei in src_shell{src}: src_shell{src/submodule.rs}
+ - Modul in eigenem Verzeichniss: src_shell{src/submodule/mod.rs}
+
+Sub-Module:
+ - inline Sub-Modul in src_shell{module.rs}
+ - Sub-Modul in eigener Datei in src_shell{src/module}: src_shell{src/module/submodule.rs}
+ - Sub-Modul in eigenem Verzeichniss: src_shell{src/module/submodule/mod.rs}
+
+*** Sichtbarkeit
+- Jedes Modul ist zunächst *privat*
+- src_rust{pub mod} für öffentliche Module
+- Sub-Module können auf alle Funktionen, Structs, etc. von Eltern-Modulen zugreifen
+
+*** Funktionalität importieren
+- externe Crates src_rust{use regex;}
+- absoluter Pfad src_rust{use crate::module::submodule;}
+- relativer Pfad
+  - src_rust{use self::module::submodule;}
+  - src_rust{use super::othermodule::submodule;}
+  - src_rust{use submodule::subsubmodule;}
+- Aliase erzeugen src_rust{use regex as re; }
+- Re-Exportieren src_rust{pub use crate::module::submodule;}
+** Abhängigkeiten von externen crates
+- Von der Kommandozeile src_shell{cargo add regex}
+- Abhängigkeiten von Crates auf [[https://crates.io/][crates.io]]
+    #+begin_src toml
+# Cargo.toml
+[dependencies]
+regex = "1.7.0"
+    #+end_src
+- Abhängigkeiten von GitHub
+    #+begin_src toml
+[dependencies]
+regex = { git = "https://github.com/rust-lang/regex" }
+    #+end_src
+- optionale Features
+  #+begin_src toml
+[dependencies]
+# Enables the `derive` feature of serde.
+serde = { version = "1.0.118", features = ["derive"] }
+  #+end_src
+
+** Weitere ausführbare Anwendungen
+- src_shell{mypkg/src/main.rs} ausführen: src_shell{cargo run --bin mypkg}
+- src_shell{mypkg/src/bin/other.rs} ausführen: src_shell{cargo run --bin other}
+- Taget-Konfiguration
+  #+begin_src toml
+# Cargo.toml
+[[bin]]
+name = "newname"
+path = "bin/other.rs"
+# ...
+  #+end_src
+
+* OOP
+** Ist Rust objektorientiert?
+- Typen, Kapselung von Daten und Methoden: YES!
+- Polymorphismus (Trait-Bounds, Generics): YES!
+- statisches und dynamisches Dispatching: YES!
+- Subtyping (auf src_rust{struct}s) und Vererbung: NOPE...
+- [[https://doc.rust-lang.org/book/ch17-00-oop.html][Rust Book zu OOP]]
+** Trait Objects
+- generische Objekte die Trait implementieren
+- dynamical Dispatch: konkrete Implementierung wird zur Laufzeit ermittelt
+- Unbekannte Größe zur Compile-Time
+
+#+begin_src rust
+let v: Box<dyn MyTrait> = Box::new(MyStruct{})
+#+end_src
+
+** Default implementations
+Implementierung von Standardverhalten
+
+#+begin_src rust
+impl Named {
+    fn get_name(&self) -> String
+    fn say_hello(&self) -> String {
+        format!("Hello, my name is {}", self.get_name())
+    }
+}
+#+end_src
+
+** Super-Traits
+- Traits die auf Funktionalität anderer Traits beruhen
+    #+begin_src rust
+    trait Shouted: fmt::Display {
+        fn shouted(&self) {
+            let out = format!("{self}"); // self needs fmt::Display
+            println!("{}!!!!", out.to_ascii_uppercase());
+        }
+    }
+    #+end_src
+
+- Traits kombinieren
+  #+begin_src rust
+trait ShoutedInfo: fmt::Display + fmt::Debug {
+    fn shouted(&self) {
+        let out = format!("{self} ({self:?})"); // self needs fmt::Display
+        println!("{}!!!!", out.to_ascii_uppercase());
+    }
+}
+  #+end_src
+
+** Häufige Patterns
+*** Build Pattern
+- Erzeugung in mehreren Schritten
+- mutable während der Erzeugung
+- imutable finales Objekt
+
+#+begin_src rust
+let mut builder = GreeterBuilder::new();
+let greeting = builder.set_name("Rust")
+ .set_greeting("Hello")
+ .build()
+#+end_src
+
+* Funktionale Programmierung
+** funktionale Programmierung als Paradigma
+- nicht veränderbare Werte
+- pure Funktionen
+- Komposition von Funktionen (First Class Functions)
+** First Class Functions
+*** Funktionen als Argumente übergeben
+- Funktionen übergeben
+    #+begin_src rust
+    fn say_something() {
+        println("something");
+    }
+
+    fn do_twice(f: fn() -> ()) -> () {
+        f();
+        f();
+    }
+
+    do_twice(say_something);
+    #+end_src
+
+- Funktionen mit Argumenten und Rückgabewert
+  #+begin_src rust
+fn twice_the_size(f: fn(&str) -> i32, s: &str) -> i32 { f(s) + f(s) }
+  #+end_src
+
+*** Funktionen als Rückgabewert
+
+Funktionen können Rückgabewert einer Funktion sein
+#+begin_src rust
+pub fn get_operator(desc: &str) -> fn(usize, usize) -> usize {
+    match desc {
+        "+" => add,
+        "*" => mult,
+        _ => panic!("unkown"),
+    }
+}
+#+end_src
+
+** Closures
+*** Closures definieren
+- Closures sind anonyme Funktionen die ihre Umgebung "einfangen".
+- Closures sind repräsentiert durch Trait src_rust{Fn} oder src_rust{FnMut}
+- keine bekannte Größe zur Compile-Time
+- Closures sind keine Funktionen (aber funktionen implementieren src_rust{Fn})
+- Typen können deduziert werden
+
+#+begin_src rust
+fn  add_one_v1   (x: u32) -> u32 { x + 1 }
+let add_one_v2 = |x: u32| -> u32 { x + 1 };
+let add_one_v3 = |x|             { x + 1 };
+let add_one_v4 = |x|               x + 1  ;
+
+dbg!(add_one_v4(1 as u32)); // x: u32 und return-Wert u32
+#+end_src
+
+*** Closures fangen ihre Umgebung ein
+- als nicht veränderbarer Wert
+    #+begin_src rust
+    {
+        let y: usize = 5;
+        // add_some: Fn(usize) -> usize
+        let add_some = |x: usize| -> usize {x + y};
+        add_some(5); // -> 10
+    }
+    #+end_src
+- als veränderbarer Wert
+    #+begin_src rust
+    {
+        let mut y: usize = 0;
+        // add_nothing: FnMut(usize) -> usize
+        let add_nothing = |x: usize| -> usize {y += 1; x};
+        add_some(5); // -> 5 und y == 1
+    }
+    #+end_src
+
+*** Closures und Ownership
+- Referenz auf Wert aus Umgebung
+  #+begin_src rust
+    let x = vec![1, 2, 3];
+    let first = || {x.len()};
+    dbg!(first());
+  #+end_src
+
+  #+RESULTS:
+  : [src/main.rs:5] first() = 3
+
+- Mutable Referenz auf Wert aus Umgebung
+  #+begin_src rust
+    let mut x = vec![1, 2, 3];
+    let mut second = || {x.push(4)}; // second: FnMut, x: &mut Vec
+    second();
+    x.len(); // 4
+  #+end_src
+
+- Besitz übernehmen
+  #+begin_src rust
+    let mut x = vec![1, 2, 3];
+    let third = move || {x.push(4); x.len()};
+    third(); // 4
+    x.len(); // Error
+  #+end_src
+
+** Iterators
+*** Maps
+- Iterieren über Collections
+  #+begin_src rust
+(1..3).map(|i| i*2).for_each(|x| println!("{x}"));
+  #+end_src
+
+- und einsammeln
+  #+begin_src rust
+let even_numbers: Vec<usize> = (1..3).map(|x| x * 2)
+    .collect(); // [2, 4, 6]
+dbg!(even_numbers);
+  #+end_src
+
+- auf src_rust{HashMap}
+  #+begin_src rust
+use std::collections::HashMap;
+let even_numbers: HashMap<usize, usize> = (1..3).map(|x| (x - 1, x * 2))
+    .collect(); // {0: 2, 1: 4, 2: 6}
+dbg!(even_numbers);
+  #+end_src
+
+
+*** Filter
+- Werte auf Eigenschaften prüfen
+  #+begin_src rust
+    (1..100).filter(|x| x % 2 == 0)
+  #+end_src
+- Filter mit Umgebung
+  #+begin_src rust
+    (1..100).filter(|x| cum += x; cum < 25)
+  #+end_src
+
+*** Folds
+- Akkumulieren von Ergebnissen
+  #+begin_src rust
+    (1..100).fold(0, |acc, x| acc + x)
+  #+end_src
+  $(\ldots((0 + 1) + 2) + 3) \ldots + 100)$
+- src_rust{rfold} Akkumulieren von Rechts
+  #+begin_src rust
+    (1..100).rfold(0, |acc, x| acc + x)
+  #+end_src  $(\ldots (98 + ( 99 + (100 + 0) \ldots )$
+
+*** Results und Options
+- src_rust{Results} und src_rust{Options} haben auch src_rust{map}
+  #+begin_src rust
+    Ok(2).map(|x| x * 2); // -> Ok(4)
+    Err("foo").map(|x| x * 2); // -> Err("foo")
+    Some("foo").map(|s| s.len() ) // -> Some(3)
+  #+end_src
+- boolsche Operatoren mit Closures src_rust{Fn(T) -> Result<U,E>}
+  #+begin_src rust
+    Ok(5).and_then(|x| Ok(x * 2)) // -> Ok(10)
+    Err("some error").or_else(|error| error_recovery(error))
+  #+end_src
+
+* Fearless Concurency
+** Concurrency und Parallelism
+*** Definitionen
+- Paralelität: zeitgleiche Ausführung von mehreren Vorgängen
+  (OS-Threads und Prozesse)
+- Nebenläufigkeit: gemeinsame Ausführung von mehreren Vorgängen
+  - Präemptive Nebenläufigkeit: ausführender Vorgang wird von Management-Prozess unterbrochen
+    (greenlets, goroutines)
+  - Kooperative Nebenläufigkeit: ausführender Vorgang pausiert selbständig und lässt anderen Vorgang weiterarbeiten
+    (JavaScript async/await, Python asyncio, Rust async-await)
+*** Probleme mit Speicher
+- Deadlocks: simultanes Warten auf Resourcen
+- Race-Conditions: simultaner ändernder Zugriff auf gleichen Speicher
+** Threads
+*** Threads starten und beenden
+- starten eins Threads
+  #+begin_src rust
+thread::spawn(|| { println("Hello, Threads!"); });
+  #+end_src
+- warten auf Ende eines Threads
+  #+begin_src rust
+let handle = thread::spawn(|| {
+    println("Give me a minute");
+    thread::sleep(Duration::from_secs(60));
+    println("Ok, done!");
+});
+handle.join.unwrap(); // wartet auf thread
+  #+end_src
+- src_rust{handle.is_finished()} prüft ob der Thread fertig ist
+*** Ownership und Threads
+#+begin_src rust
+fn main() {
+    let name = String::from("Rust");
+    thread::spawn(move || {println("Hello, {name}");})
+        .join().unwrap();
+}
+#+end_src
+
+- Laufzeit von Threads kann nicht geprüft werden
+- src_rust{move}, src_rust{Rc} oder src_rust{Clone}
+*** geteilten Speicher synchronisieren
+
+- src_rust{Rc} \rightarrow src_rust{Arc}
+- src_rust{RefCell} \rightarrow src_rust{Mutex}
+- src_rust{RwLock}: multiple readers, single writer
+
+*** Shared State mit Mutexen
+#+begin_src rust
+let cnt = Arc::new(Mutex::new(0));
+
+let cnt_clone = Arc::clone(&cnt);
+thread::spawn(move || {
+    let mut local_cnt = cnt_clone.lock().unwrap();
+    local_cnt += 1;
+});
+#+end_src
+
+*** Speicher teilen über Channels
+
+#+begin_quote
+Do not communicate by sharing memory; instead, share memory by communicating.
+#+end_quote
+([[https://go.dev/doc/effective_go#concurrency][Go Dokumentation]])
+
+- Mechanismus zum Übertragen von Werten und Objekten
+- src_rust{mspc::channel}
+*** Channel erstellen und Nachrichten übertragen
+#+begin_src rust
+let (transmitter, receiver) = mscp::channel();
+
+thread::spawn(|| { transmitter.send(String::from("foo")).unwrap()} );
+let msg = receiver.recv().unwrap();
+#+end_src
+
+- mit src_rust{transmitter} beliebig viele Nachrichten senden
+- src_rust{recv} ist ein src_rust{Err} sobald src_rust{transmitter} gelöscht ist
+
+*** mpsc: Multiple Producers, Single Consumer
+#+begin_src rust
+let (transmitter, receiver) = mscp::channel();
+
+let t1 = transmitter.clone();
+thread::spawn(|| { t1.send(String::from("foo")).unwrap()} );
+let t2 = transmitter.clone();
+thread::spawn(|| { t2.send(String::from("bar")).unwrap()} );
+
+drop(transmitter);
+
+for msg in receiver {
+    println!("{msg}");
+}
+#+end_src
+
+*** Sync und Send Traits
+- Send-Trait: Objekte können zwischen Threads transferiert werden
+- Sync-Trait: src_rust{T} implementiert src_rust{Sync}, wenn src_rust{&T} src_rust{Send} implementiert
+- alle primitiven Typen
+- *nicht* src_rust{Rc}
+- alle Typen die aus src_rust{Send} / src_rust{Sync} zusammengesetzt sind
+
+* Interoperatibilität
+** Interoperation mit C++
+*** Anwendungsfälle
+- (alte) C++-Bibliothek von Rust aus benutzen
+  - legacy Bibliotheken weiter benutzen
+  - legacy Entwicklung in Rust fortführen
+- Rust-Bibliothek implementieren und von C++ aus benutzen
+  - C++-Anwendung in Rust weiterentwickeln
+  - Rewrite in Rust schrittweise durchführen
+*** Pakete
+- https://cxx.rs/index.html
+  Vollständige Brücke zwischen Rust und C++, keine Anpassung des C++-Codes oder des Rust-Codes notwendig
+- https://github.com/mystor/rust-cpp
+  Inline C++-Code in Rust-Code
+  Falls eine C++-Lib häufig in Rust genutzt werden soll
+*** CXX
+- "Rust \leftarrow C++"-Build-System mit cargo
+- Boilerplate-Code wird automatisch generiert
+- Übersetzen von Typen
+- Teilen von Daten-Strukturen
+*** CXX Bridge: Rust -> C++
+- C++ Funktionen deklarieren
+  #+begin_src rust
+#[cxx::bridge]
+mod ffi {
+    unsafe extern "C++" {
+        include!("package/include/header.h");
+
+        fn get_string_len(input: &str) -> usize;
+    }
+}
+  #+end_src
+- Aufruf in Rust
+  #+begin_src rust
+let str_size = ffi::get_string_len("Hello, World!");
+  #+end_src
+
+- C++ Implementierung
+  #+begin_src cpp
+// strlen.h
+uint64_t get_string_len(rust::Str);
+  #+end_src
+  #+begin_src C++
+uint64_t get_string_len(rust::Str input){
+  return input.size();
+}
+  #+end_src
+
+*** CXX Bridge: C++ -> Rust
+- Rust-Funktionen deklarieren
+  #+begin_src rust
+#[cxx::bridge(namespace = "org::strlib")]
+mod ffi {
+    extern "Rust" {
+        fn get_size(input: &CxxString) -> usize;
+    }
+
+}
+  #+end_src
+- Rust-Funktion in C++ benutzen
+  #+begin_src cpp
+    auto len = org::strlib::get_size("Hello, World!")<< std::endl;
+  #+end_src
+- Rust-Funktion implementieren
+  #+begin_src rust
+fn get_size(input: &CxxString) -> usize {
+    input.len()
+}
+  #+end_src
+
+*** CXX Type-Übersetzung
+- rudimentäre Typen (src_cpp{uint64_t} \rightarrow src_rust{u64})
+- Rust-Typen in C++ übersetzt
+  | Rust         | C++                |
+  | ------------ | ------------------ |
+  | String       | rust::String       |
+  | &str         | rust::Str          |
+  | Vec<T>       | rust::Vec<T>       |
+  | Result<T>    | throw/catch        |
+- C++-Typen in Rust übersetzen
+  | Rust         | C++                |
+  | ------------ | ------------------ |
+  | CxxString    | std::string        |
+  | UniquePtr<T> | std::unique_ptr<T> |
+  | CxxVector<T> | std::Vec<T>        |
+*** Tour durch Projekte
+** Rust interoperation mit Python
+*** Anwendungsfälle
+- Bottlenecks in Python-Anwendungen in Rust implementieren
+  Beispiele:
+  - [[https://github.com/tbehner/rentropy][rentropy]]
+  - [[https://github.com/ijl/orjson][orjson]]
+  - [[https://github.com/pola-rs/polars][polars]]
+- Rust-Anwendungen mit Python automatisieren
+*** Python-Pakete in Rust
+- PyO3
+  - Rust \leftrightarrow Python
+  - Type-Konvertierung
+- Maturin
+  - Initialisieren
+  - Bauen
+  - Verteilen (außer manylinux)
+*** maturin
+- Initialisieren von neuen Projekten
+  #+begin_src shell
+maturin init
+  #+end_src
+- Bauen von Python-Modulen/Paketen
+  #+begin_src shell
+maturin build
+  #+end_src
+- Installieren von Python-Paket in Virtualenv
+  #+begin_src shell
+maturin develop
+  #+end_src
+*** Python-Modul in Rust mit PyO3
+#+begin_src rust
+#[pymodule]
+fn pyrsdemo(_py: Python, m: &PyModule) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(get_file_size, m)?)?;
+    Ok(())
+}
+#+end_src
+*** Python-Funktionen in Rust
+#+begin_src rust
+#[pyfunction]
+fn get_file_size(a: &str) -> PyResult<u64> {
+    let path = PathBuf::from(a);
+    if !path.exists() {
+        return Err(PyValueError::new_err("{a} does not exist!"));
+    }
+
+    Ok(path.metadata()?.len())
+}
+#+end_src
+
+- PyResult für Python-Errors
+- Transparente Type-Konvertierung
+*** Python-Klassen in Rust
+- Struct \rightarrow Python-Class
+  #+begin_src rust
+#[pyclass]
+struct MyGreeter{
+    greeting: String,
+}
+  #+end_src
+- Methoden und Dunder-Methoden definieren
+ #+begin_src rust
+#[pymethods]
+impl MyGreeter {
+    #[new]
+    fn __new__(greeting: &str) -> Self {
+        MyGreeter{ greeting: greeting.to_string() }
+    }
+
+    fn greet(&self, subj: &str) -> String {
+        format!("{self.greeting}, {subj}!")
+    }
+}
+ #+end_src
+- Vererbung
+*** Python von Rust aufrufen
+- Initialisieren von Python und des GILs
+  #+begin_src rust
+    pyo3::prepare_freethreaded_python();
+  #+end_src
+- GIL reservieren
+  #+begin_src rust
+    Python::with_gil(|py| {
+        })
+  #+end_src
+- Python-Code ausführen
+  #+begin_src rust
+let result: Result<Option<Vec<u64>>, PyErr> = py
+        .eval("[i * 10 for i in range(5)]", None, None)?
+        .extract()?;
+  #+end_src
